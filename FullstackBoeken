@@ -1,0 +1,62 @@
+package com.example.demo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@SpringBootApplication
+@RestController
+public class DemoApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DemoApplication.class, args);
+	}
+
+    @Autowired
+    private BookRepository bookRepository;
+
+    @GetMapping("/")
+    public String great(){
+        return "Hello backend";
+    }
+
+    //Create
+    @GetMapping("getAllBooks")
+    public List<Book> getAllBooks(){
+        return (List<Book>) bookRepository.findAll();
+    }
+
+    //Read
+@PostMapping(path="/addBook")
+public @ResponseBody String addBook (@RequestParam String title){
+        Book book = new Book();
+        book.setName(title);
+        bookRepository.save(book);
+        return title + "is saved";
+}
+
+    // Update
+    @PutMapping("/updateBook")
+    public String updateBook(@RequestParam Integer id, @RequestParam String title) {
+        Book book = bookRepository.findById(id).orElse(null);
+        if (book == null) {
+            return "Book not found";
+        }
+        book.setTitle(title);
+        bookRepository.save(book);
+        return "Book with id " + id + " updated to " + title;
+    }
+
+    @DeleteMapping("/deleteBook")
+    public String deleteBook(@RequestParam Integer id) {
+        if (!bookRepository.existsById(id)) {
+            return "Book not found";
+        }
+        BookRepository.deleteById(id);
+        return "Book with id " + id + " deleted";
+    }
+
+}
